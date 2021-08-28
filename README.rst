@@ -23,7 +23,7 @@ Caches the output of functions with time-based buckets
 
 
 * Free software: MIT license
-* Documentation: https:/async-cache-updater.readthedocs.io.
+* Documentation: https://async-cache-updater.readthedocs.io.
 
 
 Features
