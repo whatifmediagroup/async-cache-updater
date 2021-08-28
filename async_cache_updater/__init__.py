@@ -38,5 +38,5 @@ __version__ = '0.1.0'
 __all__ = ['async_cache_updater', 'cache_settings', 'setup_client']
 
 
-from async_cache_updater.decorators import async_cache_updater
 from async_cache_updater.settings import cache_settings, setup_client
+from async_cache_updater.decorators import async_cache_updater

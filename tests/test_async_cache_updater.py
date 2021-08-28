@@ -15,12 +15,11 @@ from async_cache_updater import async_cache_updater, setup_client
 pytestmark = pytest.mark.asyncio
 
 
-@contextmanager
-def timeit():
+async def time_async(func, *args, **kwargs):
     start = time.time()
-    yield
+    await func(*args, **kwargs)
     end = time.time()
-    print(f'{end - start:0.2f} seconds')
+    return end - start
 
 
 @pytest.fixture
@@ -40,8 +39,13 @@ async def basic_func(arg):
 
 
 async def test_basic_func(redis_client):
-    with timeit():
-        first = await basic_func('foo')
-    with timeit():
-        second = await basic_func('foo')
+    first = await basic_func('foo')
+    second = await basic_func('foo')
     assert first == second
+
+
+async def test_basic_func_timer(redis_client):
+    first = await time_async(basic_func, 'foo')
+    second = await time_async(basic_func, 'foo')
+    assert first > 1.0
+    assert second < 1.0

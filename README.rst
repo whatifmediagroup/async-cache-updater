@@ -9,8 +9,8 @@ Async Cache Updater
 .. image:: https://img.shields.io/travis/revpoint/async-cache-updater.svg
     :target: https://travis-ci.com/revpoint/async-cache-updater
 
-.. image:: https://readthedocs.org/projectsasync-cache-updater/badge/?version=latest
-    :target: https:/async-cache-updater.readthedocs.io/en/latest/?version=latest
+.. image:: https://readthedocs.org/projects/async-cache-updater/badge/?version=latest
+    :target: https://async-cache-updater.readthedocs.io/en/latest/?version=latest
     :alt: Documentation Status
 
 .. image:: https://pyup.io/repos/github/revpoint/async-cache-updater/shield.svg
