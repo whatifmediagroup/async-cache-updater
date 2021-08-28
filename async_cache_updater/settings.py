@@ -8,31 +8,35 @@ ONE_WEEK = 7 * ONE_DAY
 
 
 def env(name, default):
-    return os.environ.get(name, default)
+    return os.environ.get(f'CACHE_UPDATER_{name.upper()}', default)
 
 
 DEFAULT_SETTINGS = {
-    'DEFAULT_CLIENT': None,
-    'CACHE_KEY_PREFIX': env('CACHE_UPDATER_KEY_PREFIX', 'cache_updater'),
-    'CACHE_INDEX_PREFIX': env('CACHE_UPDATER_INDEX_PREFIX', 'cache_index'),
-    'CACHE_REFRESH_PREFIX': env('CACHE_UPDATER_REFRESH_PREFIX', 'cache_refresh_time'),
-    'CACHE_UPDATED_PREFIX': env('CACHE_UPDATER_UPDATED_PREFIX', 'cache_updated_time'),
-    'DEFAULT_TIMEZONE': env('CACHE_UPDATER_DEFAULT_TIMEZONE', 'US/Eastern'),
-    'DEFAULT_TIMEOUT_TTL': env('CACHE_UPDATER_DEFAULT_TIMEOUT_TTL', ONE_HOUR),
-    'DEFAULT_TIMEOUT_REFRESH': env('CACHE_UPDATER_DEFAULT_TIMEOUT_REFRESH', None),
-    'DEFAULT_REFRESH_STRATEGY': env('CACHE_UPDATER_DEFAULT_REFRESH_STRATEGY', 'all'),
+    'KEY_PREFIX': 'cache_updater',
+    'INDEX_PREFIX': 'cache_index',
+    'REFRESH_PREFIX': 'cache_refresh_time',
+    'UPDATED_PREFIX': 'cache_updated_time',
+    'DEFAULT_TIMEZONE': 'US/Eastern',
+    'DEFAULT_TIMEOUT_TTL': ONE_HOUR,
+    'DEFAULT_TIMEOUT_REFRESH': None,
+    'DEFAULT_REFRESH_STRATEGY': 'all',
 }
 
 
 class CacheSettings:
+    DEFAULT_CLIENT = None
+
     def __init__(self):
-        for attr, val in DEFAULT_SETTINGS.items():
-            setattr(self, attr, val)
+        for name, default in DEFAULT_SETTINGS.items():
+            value = env(name, default)
+            setattr(self, name, value)
 
     def setup(self, client, **kwargs):
-        setattr(self, 'DEFAULT_CLIENT', client)
-        for key, value in kwargs.items():
-            setattr(self, key.lower(), value)
+        self.DEFAULT_CLIENT = client
+        for name, value in kwargs.items():
+            name = name.upper().replace('CACHE_UPDATER_', '')
+            if name in DEFAULT_SETTINGS:
+                setattr(self, name, value)
 
 
 cache_settings = CacheSettings()

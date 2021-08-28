@@ -206,7 +206,7 @@ def async_cache_updater(
                 if arg not in (timestamp_name, tz_name)
             ]
             cache_args = [
-                cache_settings.CACHE_KEY_PREFIX,
+                cache_settings.KEY_PREFIX,
                 func_module,
                 func_name,
                 ':'.join(arglist),
@@ -225,7 +225,7 @@ def async_cache_updater(
 
         def get_index_key():
             index_key = '{}:{}:{}'.format(
-                cache_settings.CACHE_INDEX_PREFIX,
+                cache_settings.INDEX_PREFIX,
                 func_module,
                 func_name,
             )
@@ -234,13 +234,13 @@ def async_cache_updater(
 
         def get_updated_key(cache_key):
             return '{}:{}'.format(
-                cache_settings.CACHE_UPDATED_PREFIX,
+                cache_settings.UPDATED_PREFIX,
                 cache_key,
             )
 
         def get_refresh_key(cache_key):
             return '{}:{}'.format(
-                cache_settings.CACHE_REFRESH_PREFIX,
+                cache_settings.REFRESH_PREFIX,
                 cache_key,
             )
 

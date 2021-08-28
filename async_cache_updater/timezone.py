@@ -67,7 +67,9 @@ def get_fixed_timezone(offset):
 
 
 def is_aware(value):
-    return value.tzinfo is not None and value.tzinfo.utcoffset(value) is not None
+    return (
+        value.tzinfo is not None and value.tzinfo.utcoffset(value) is not None
+    )
 
 
 def is_naive(value):

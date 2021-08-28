@@ -7,7 +7,9 @@ from asgiref.sync import sync_to_async
 from dateutil.relativedelta import relativedelta
 
 from async_cache_updater.dateparse import parse_date, parse_datetime
-from async_cache_updater.timezone import is_aware, localtime, make_aware, tz_now, utc
+from async_cache_updater.timezone import (
+    is_aware, localtime, make_aware, tz_now, utc
+)
 
 
 def force_async(func, *args, **kwargs):
