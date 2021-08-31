@@ -8,7 +8,11 @@ from dateutil.relativedelta import relativedelta
 
 from async_cache_updater.dateparse import parse_date, parse_datetime
 from async_cache_updater.timezone import (
-    is_aware, localtime, make_aware, tz_now, utc
+    is_aware,
+    localtime,
+    make_aware,
+    tz_now,
+    utc,
 )
 
 
@@ -213,8 +217,9 @@ def find_bucket_start(bucket, dt, tz):
         return first_year
 
     raise ValueError(
-        'Could not detect change in time with bucket method "{}"'
-        .format(bucket.__name__)
+        'Could not detect change in time with bucket method "{}"'.format(
+            bucket.__name__
+        )
     )
 
 
@@ -264,8 +269,9 @@ def find_bucket_step(bucket, dt, tz):
             return delta_year
 
     raise ValueError(
-        'Could not detect change in time with bucket method "{}"'
-        .format(bucket.__name__)
+        'Could not detect change in time with bucket method "{}"'.format(
+            bucket.__name__
+        )
     )
 
 
@@ -281,7 +287,8 @@ def delta_gt_1_day(delta):
             return True
 
     if isinstance(delta, relativedelta):
-        if any((
+        if any(
+            (
                 delta.years,
                 delta.months,
                 delta.days,
@@ -290,7 +297,8 @@ def delta_gt_1_day(delta):
                 delta.month is not None,
                 delta.day is not None,
                 delta.weekday is not None,
-        )):
+            )
+        ):
             if delta._has_time:
                 raise ValueError(
                     'Cannot have time when using a delta > 1 day'

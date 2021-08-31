@@ -1,7 +1,8 @@
 import datetime
 import re
 
-from async_cache_updater.timezone import utc, get_fixed_timezone
+from async_cache_updater.timezone import get_fixed_timezone, utc
+
 
 date_re = re.compile(
     r'(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})$'

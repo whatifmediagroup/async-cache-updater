@@ -3,7 +3,6 @@
 """Tests for `async_cache_updater` package."""
 import asyncio
 import time
-from contextlib import contextmanager
 
 import aioredis
 import pytest

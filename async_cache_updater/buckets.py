@@ -1,4 +1,10 @@
+import datetime
+from typing import Optional
+
+import pytz
+
 from async_cache_updater import utils
+from async_cache_updater.types import BucketMethodType, BucketTypes
 
 
 def hourly(dt, tz):
@@ -29,12 +35,14 @@ BUCKET_LOOKUPS = {
 }
 
 
-def get_bucket(bucket):
+def get_bucket(bucket: BucketTypes) -> Optional[BucketMethodType]:
     if bucket is None or callable(bucket):
         return bucket
     return BUCKET_LOOKUPS[bucket]
 
 
-def generate_bucket_name(bucket, dt, tz):
+def generate_bucket_name(
+    bucket: BucketTypes, dt: datetime.datetime, tz: pytz.timezone
+) -> str:
     bucket_lookup = get_bucket(bucket)
     return bucket_lookup(dt, tz)

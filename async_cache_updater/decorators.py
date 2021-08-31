@@ -10,9 +10,21 @@ import pytz
 from async_cache_updater import cache, cache_settings
 from async_cache_updater.buckets import generate_bucket_name, get_bucket
 from async_cache_updater.timezone import tz_now
+from async_cache_updater.types import (
+    BucketTypes,
+    CachedFunctionType,
+    CachedDecoratorType,
+    DefaultDTMethodType,
+    TZLookupMethodType,
+)
 from async_cache_updater.utils import (
-    hash_key, parse_timestamp, get_bucket_range,
-    find_bucket_ranges, latest_bucket_ranges, current_unix_time, force_async,
+    current_unix_time,
+    find_bucket_ranges,
+    force_async,
+    hash_key,
+    get_bucket_range,
+    latest_bucket_ranges,
+    parse_timestamp,
 )
 
 _redis_exceptions = (
@@ -26,18 +38,18 @@ _empty = object()
 
 
 def async_cache_updater(
-        fn=None,
-        bucket=None,
-        client=None,
-        default_dt=tz_now,
-        lookup_name=None,
-        refresh_strategy=cache_settings.DEFAULT_REFRESH_STRATEGY,
-        timeout_refresh=cache_settings.DEFAULT_TIMEOUT_REFRESH,
-        timeout_ttl=cache_settings.DEFAULT_TIMEOUT_TTL,
-        timestamp_name='dt',
-        tz_name='tz',
-        tz_lookup=None,
-):
+    fn: CachedFunctionType = None,
+    bucket: BucketTypes = None,
+    client: aioredis.Redis = None,
+    default_dt: DefaultDTMethodType = tz_now,
+    lookup_name: str = None,
+    refresh_strategy: str = cache_settings.DEFAULT_REFRESH_STRATEGY,
+    timeout_refresh: int = cache_settings.DEFAULT_TIMEOUT_REFRESH,
+    timeout_ttl: int = cache_settings.DEFAULT_TIMEOUT_TTL,
+    timestamp_name: str = 'dt',
+    tz_name: str = 'tz',
+    tz_lookup: TZLookupMethodType = None,
+) -> CachedDecoratorType:
     """Decorator that caches the output of a function.
 
     Generates a cached function that will memoize based on the called
@@ -65,24 +77,13 @@ def async_cache_updater(
         cached function
     :param tz_lookup: Function that is used to lookup the timezone used for
         the cache bucket
-    :type fn: function
-    :type bucket: None or str or function
-    :type client: aioredis.Redis
-    :type default_dt: function
-    :type lookup_name: str
-    :type refresh_strategy: str
-    :type timeout_refresh: int
-    :type timeout_ttl: int
-    :type timestamp_name: str
-    :type tz_name: str
-    :type tz_lookup: function
+
     :raise: ValueError if cached function is missing arguments
     :return: Decorator that generates a cached function
-    :rtype: function
 
     """
 
-    def _decorator(func):
+    def _decorator(func: CachedFunctionType) -> CachedFunctionType:
         @functools.wraps(func)
         async def cached_func(*args, **kwargs):
             force_cache = kwargs.pop('force_cache', False)
@@ -145,18 +146,20 @@ def async_cache_updater(
             missing = [key for key in lookup_keys if key not in results]
 
             for cache_key in missing:
-                call_args[timestamp_name] = series[cache_key]
+                bucket_args = call_args.copy()
+                bucket_args[timestamp_name] = series[cache_key]
                 results[cache_key] = await run_and_cache(
-                    call_args, cache_key, timeout_ttl,
+                    bucket_args, cache_key, timeout_ttl,
                 )
 
             refresh_info = await get_refresh_info(found)
             for cache_key, refresh_at, updated_at in refresh_info:
-                call_args[timestamp_name] = series[cache_key]
+                bucket_args = call_args.copy()
+                bucket_args[timestamp_name] = series[cache_key]
                 if await should_refresh(
-                    call_args, cache_key, refresh_at, updated_at,
+                    bucket_args, cache_key, refresh_at, updated_at,
                 ):
-                    run_cache_refresh(call_args, cache_key, timeout_ttl)
+                    run_cache_refresh(bucket_args, cache_key, timeout_ttl)
 
             return [
                 (timestamp, results[cache_key])
@@ -202,7 +205,8 @@ def async_cache_updater(
 
         def get_cache_key(call_args):
             arglist = [
-                str(call_args[arg]) for arg in func_args
+                str(call_args[arg])
+                for arg in func_args
                 if arg not in (timestamp_name, tz_name)
             ]
             cache_args = [
@@ -294,8 +298,9 @@ def async_cache_updater(
             updated_key = get_updated_key(cache_key)
             return {updated_key: tz_now()}
 
-        async def should_refresh(call_args, cache_key, refresh_at=_empty,
-                                 updated_at=_empty):
+        async def should_refresh(
+            call_args, cache_key, refresh_at=_empty, updated_at=_empty
+        ):
             if timeout_refresh is None:
                 return False
             if refresh_at is _empty:
