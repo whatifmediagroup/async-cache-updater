@@ -1,6 +1,6 @@
-==================
+===================
 Async Cache Updater
-==================
+===================
 
 
 .. image:: https://img.shields.io/pypi/v/async-cache-updater.svg
