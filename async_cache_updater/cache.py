@@ -25,7 +25,8 @@ def _serialize(payload: typing.Any) -> bytes:
 
 
 def _deserialize(payload: bytes) -> typing.Any:
-    return pickle.loads(payload)
+    if payload is not None:
+        return pickle.loads(payload)
 
 
 async def get(client, key, default=None):
@@ -49,7 +50,11 @@ async def delete(client, key):
 async def get_many(client, keys):
     client = get_cache_client(client)
     values = await client.mget(keys)
-    return list(map(_deserialize, values))
+    return {
+        key: value
+        for key, value in zip(keys, map(_deserialize, values))
+        if value is not None
+    }
 
 
 async def set_many(client, data, timeout=None):
