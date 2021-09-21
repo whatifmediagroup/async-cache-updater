@@ -13,6 +13,8 @@ def get_cache_client(client):
         raise RuntimeError(
             'Must run setup_client() before using async_cache_updater'
         )
+    if callable(client):
+        client = client()
     if not isinstance(client, Redis):
         raise ValueError(
             'Only aioredis can be used as cache backend'
@@ -30,30 +32,26 @@ def _deserialize(payload: bytes) -> typing.Any:
 
 
 async def get(client, key, default=None):
-    cache = get_cache_client(client)
-    async with cache.client() as conn:
-        result = await conn.get(key)
+    client = get_cache_client(client)
+    result = await client.get(key)
     if result is None:
         return default
     return _deserialize(result)
 
 
 async def set(client, key, value, timeout=None):
-    cache = get_cache_client(client)
-    async with cache.client() as conn:
-        await conn.set(key, _serialize(value), timeout)
+    client = get_cache_client(client)
+    await client.set(key, _serialize(value), timeout)
 
 
 async def delete(client, key):
-    cache = get_cache_client(client)
-    async with cache.client() as conn:
-        await conn.delete(key)
+    client = get_cache_client(client)
+    await client.delete(key)
 
 
 async def get_many(client, keys):
-    cache = get_cache_client(client)
-    async with cache.client() as conn:
-        values = await conn.mget(keys)
+    client = get_cache_client(client)
+    values = await client.mget(keys)
     return {
         key: value
         for key, value in zip(keys, map(_deserialize, values))
@@ -62,29 +60,25 @@ async def get_many(client, keys):
 
 
 async def set_many(client, data, timeout=None):
-    cache = get_cache_client(client)
-    async with cache.client() as conn:
-        await conn.mset({key: _serialize(val) for key, val in data.items()})
+    client = get_cache_client(client)
+    await client.mset({key: _serialize(val) for key, val in data.items()})
 
 
 async def delete_many(client, keys):
-    cache = get_cache_client(client)
-    async with cache.client() as conn:
-        await conn.delete(*keys)
+    client = get_cache_client(client)
+    await client.delete(*keys)
 
 
 async def update_index(client, cache_key, index_key, timeout):
-    cache = get_cache_client(client)
+    client = get_cache_client(client)
     now = current_unix_time()
-    async with cache.client() as conn:
-        if timeout:
-            await conn.zremrangebyscore(index_key, '-inf', now - timeout)
-        await conn.zadd(index_key, {cache_key: now})
+    if timeout:
+        await client.zremrangebyscore(index_key, '-inf', now - timeout)
+    await client.zadd(index_key, {cache_key: now})
 
 
 async def clear_index(client, index_key, before, after):
-    cache = get_cache_client(client)
-    async with cache.client() as conn:
-        cache_keys = await conn.zrangebyscore(index_key, after, before)
-        await delete_many(client, cache_keys)
-        await conn.zremrangebyscore(index_key, after, before)
+    client = get_cache_client(client)
+    cache_keys = await client.zrangebyscore(index_key, after, before)
+    await delete_many(client, cache_keys)
+    await client.zremrangebyscore(index_key, after, before)
