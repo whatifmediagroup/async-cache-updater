@@ -84,6 +84,9 @@ def async_cache_updater(
     """
 
     def _decorator(func: CachedFunctionType) -> CachedFunctionType:
+        if cache_settings.DISABLED:
+            return func
+
         @functools.wraps(func)
         async def cached_func(*args, **kwargs):
             force_cache = kwargs.pop('force_cache', False)
