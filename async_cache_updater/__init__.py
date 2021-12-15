@@ -2,7 +2,7 @@
 
 __author__ = """RevPoint Media"""
 __email__ = 'tech@jangl.com'
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 __all__ = ['async_cache_updater', 'cache_settings', 'setup_client']
 
