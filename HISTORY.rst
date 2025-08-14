@@ -2,6 +2,13 @@
 History
 =======
 
+1.0.0 (2025-08-14)
+------------------
+
+* Replace aioredis with redis-py
+* Require Python 3.9+
+* Add ignore_args setting to ignore specific arguments in cache keys
+
 0.1.5 (2021-12-15)
 ------------------
 
