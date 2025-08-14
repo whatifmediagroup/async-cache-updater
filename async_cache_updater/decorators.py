@@ -4,7 +4,7 @@ import inspect
 import logging
 import re
 
-import aioredis
+import redis.asyncio as redis
 import pytz
 
 from async_cache_updater import cache, cache_settings
@@ -28,7 +28,7 @@ from async_cache_updater.utils import (
 )
 
 _redis_exceptions = (
-    aioredis.RedisError,
+    redis.RedisError,
     asyncio.TimeoutError,
 )
 
@@ -40,8 +40,9 @@ _empty = object()
 def async_cache_updater(
     fn: CachedFunctionType = None,
     bucket: BucketTypes = None,
-    client: aioredis.Redis = None,
+    client: redis.Redis = None,
     default_dt: DefaultDTMethodType = tz_now,
+    ignore_args: list[str] = None,
     lookup_name: str = None,
     refresh_strategy: str = cache_settings.DEFAULT_REFRESH_STRATEGY,
     timeout_refresh: int = cache_settings.DEFAULT_TIMEOUT_REFRESH,
@@ -65,6 +66,7 @@ def async_cache_updater(
     :param bucket: Time-based bucket used for the cache key
     :param client: Redis cache instance to be used
     :param default_dt: Function that is called when timestamp is None
+    :param ignore_args: List of argument names to exclude from cache key generation
     :param lookup_name: Name of the function saved to the cache
     :param refresh_strategy: Strategy that determines if refresh should
         run on `all` buckets or only `latest` bucket
@@ -207,10 +209,14 @@ def async_cache_updater(
             return call_args
 
         def get_cache_key(call_args):
+            ignored_args = set([timestamp_name, tz_name])
+            if ignore_args:
+                ignored_args.update(ignore_args)
+
             arglist = [
                 str(call_args[arg])
                 for arg in func_args
-                if arg not in (timestamp_name, tz_name)
+                if arg not in ignored_args
             ]
             cache_args = [
                 cache_settings.KEY_PREFIX,

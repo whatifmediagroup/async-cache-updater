@@ -1,7 +1,7 @@
 import pickle
 import typing
 
-from aioredis import Redis
+from redis.asyncio import Redis
 
 from async_cache_updater import cache_settings
 from async_cache_updater.utils import current_unix_time
@@ -17,7 +17,7 @@ def get_cache_client(client):
         client = client()
     if not isinstance(client, Redis):
         raise ValueError(
-            'Only aioredis can be used as cache backend'
+            'Only redis-py can be used as cache backend'
         )
     return client
 
